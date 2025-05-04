@@ -1,41 +1,33 @@
-name: Build and Cross-Compile
-
-on:
-  push:
-    branches:
-      - master  # Use 'master' if your default branch is 'master'
-  pull_request:
-    branches:
-      - master
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        override: true
-        components: rustfmt
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt
 
-    - name: Install Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y pkg-config libssl-dev libudev-dev
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libssl-dev libudev-dev
 
-    - name: Add target for aarch64
-      run: rustup target add aarch64-unknown-linux-gnu
+      - name: Add target for aarch64
+        run: rustup target add aarch64-unknown-linux-gnu
 
-    - name: Build for aarch64
-      run: cargo build --release --target aarch64-unknown-linux-gnu
+      - name: Install cross
+        run: cargo install cross
 
-    - name: Upload the binary
-      uses: actions/upload-artifact@v4
-      with:
-        name: aarch64-binary
-        path: target/aarch64-unknown-linux-gnu/release/my-screen-watch-man
+      - name: Cross-compile for aarch64
+        run: cross build --release --target aarch64-unknown-linux-gnu
+
+      - name: Upload the binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: aarch64-binary
+          path: target/aarch64-unknown-linux-gnu/release/my-screen-watch-man
